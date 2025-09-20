@@ -1,0 +1,74 @@
+{% include 'layout.html' %}
+
+<div class="container">
+    <div class="card text-center">
+        <div class="card-header">
+            Your Todos
+        </div>
+        <div class="card-body">
+            <h5 class="card-title">
+                List of your todos
+            </h5>
+            <div class="mb-3">
+                <button class="btn btn-outline-primary"
+                        onclick="window.location.href='/todos/todo-page?sort_by=id&order=asc'">Sort by Creation ↑
+                </button>
+                <button class="btn btn-outline-primary"
+                        onclick="window.location.href='/todos/todo-page?sort_by=id&order=desc'">Sort by Creation ↓
+                </button>
+                <button class="btn btn-outline-secondary"
+                        onclick="window.location.href='/todos/todo-page?sort_by=priority&order=asc'">Sort by Priority ↑
+                </button>
+                <button class="btn btn-outline-secondary"
+                        onclick="window.location.href='/todos/todo-page?sort_by=priority&order=desc'">Sort by Priority ↓
+                </button>
+                <button class="btn btn-outline-success"
+                        onclick="window.location.href='/todos/todo-page?sort_by=complete&order=asc'">Incomplete First
+                </button>
+                <button class="btn btn-outline-success"
+                        onclick="window.location.href='/todos/todo-page?sort_by=complete&order=desc'">Completed First
+                </button>
+            </div>
+
+
+            <table class="table table-hover">
+                <thead>
+                <tr>
+                    <th scope="col">№</th>
+                    <th scope="col">Title</th>
+                    <th scope="col">Priority</th>
+                    <th scope="col">Actions</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for todo in todos %}
+                {% set row_class = 'alert alert-success' if todo.complete else '' %}
+                {% set title_class = 'strike-through-td' if todo.complete else '' %}
+                <tr class="pointer {{ row_class }}">
+                    <td>{{ todo.display_number }}</td>
+
+                    <td class="{{ title_class }}">{{ todo.title }}</td>
+                    <td>{% if todo.priority == 1 %}Very High
+                    {% elif todo.priority == 2 %}High
+                    {% elif todo.priority == 3 %}Medium
+                    {% elif todo.priority == 4 %}Low
+                    {% elif todo.priority == 5 %}Very Low
+                    {% else %}Unknown{% endif %}</td>
+                    <td>
+                        <button onclick="window.location.href='edit-todo-page/{{ todo.id }}'"
+                                type="button" class="btn btn-info">
+                            Edit
+                        </button>
+                        <button onclick="window.location.href='view-todo-page/{{ todo.id }}'"
+                                type="button" class="btn btn-secondary">
+                            View
+                        </button>
+                    </td>
+                </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+            <a href="/todos/add-todo-page" class="btn btn-primary">Add a new todo</a>
+        </div>
+    </div>
+</div>

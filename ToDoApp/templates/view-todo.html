@@ -1,0 +1,37 @@
+{% include 'layout.html' %}
+
+<div class="container">
+    <div class="card">
+        <div class="card-header">
+            View Todo
+        </div>
+        <div class="card-body">
+            <form id="viewTodoForm">
+                <div class="form-group">
+                    <label>Title</label>
+                    <input type="text" class="form-control" name="title" value="{{todo.title}}" disabled>
+                </div>
+                <div class="form-group">
+                    <label>Description</label>
+                    <textarea class="form-control" rows="3" name="description" disabled>{{todo.description}}</textarea>
+                </div>
+                <div class="form-group">
+                    <label>Priority</label>
+                    <input type="text" class="form-control" value="{% if todo.priority == 1 %}Very High
+                    {% elif todo.priority == 2 %}High
+                    {% elif todo.priority == 3 %}Medium
+                    {% elif todo.priority == 4 %}Low
+                    {% elif todo.priority == 5 %}Very Low
+                    {% else %}Unknown{% endif %}
+                    " disabled>
+                </div>
+                <div class="form-group form-check">
+                    <input type="checkbox" class="form-check-input" name="complete" {% if todo.complete %} checked {%
+                           endif %} disabled>
+                    <label class="form-check-label">Complete</label>
+                </div>
+                <a href="/todos/todo-page" class="btn btn-success">Back</a>
+            </form>
+        </div>
+    </div>
+</div>

@@ -1,28 +1,25 @@
 import os
 from datetime import timedelta, datetime, timezone
 from typing import Annotated
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Request
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 from starlette import status
+from ..config import settings
 from ..database import SessionLocal
 from ..models import Users
 from passlib.context import CryptContext
 from fastapi.security import OAuth2PasswordRequestForm, OAuth2PasswordBearer
 from jose import jwt, JWTError
+from fastapi.templating import Jinja2Templates
 
 router = APIRouter(
     prefix="/auth",
     tags=["auth"]
 )
 
-SECRET_KEY = os.getenv("SECRET_KEY")
-if not SECRET_KEY:
-    raise ValueError("SECRET_KEY is not set in environment variables")
-
-ALGORITHM = os.getenv("ALGORITHM")
-if not ALGORITHM:
-    raise ValueError("ALGORITHM is not set in environment variables")
+SECRET_KEY = settings.secret_key
+ALGORITHM = settings.algorithm
 
 bcrypt_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 oauth2_bearer = OAuth2PasswordBearer(tokenUrl="auth/token")
@@ -48,6 +45,21 @@ def get_db():
         db.close()
 
 db_dependency = Annotated[Session, Depends(get_db)]
+
+templates = Jinja2Templates(directory="TodoApp/templates")
+
+
+### Pages ###
+
+@router.get("/login-page")
+def render_login_page(request: Request):
+    return templates.TemplateResponse("login.html", {"request": request})
+
+@router.get("/register-page")
+def render_register_page(request: Request):
+    return templates.TemplateResponse("register.html", {"request": request})
+
+### Endpoints ###
 
 def authenticate_user(username: str, password: str, db):
     user = db.query(Users).filter(Users.username == username).first()

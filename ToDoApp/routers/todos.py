@@ -1,11 +1,14 @@
 from typing import Annotated
 from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
-from fastapi import APIRouter, Depends, HTTPException, Path
-from starlette import status
+from fastapi import APIRouter, Depends, HTTPException, Path, Request, status
 from ..models import Todos
 from ..database import SessionLocal
 from .auth import get_current_user
+from starlette.responses import RedirectResponse
+from fastapi.templating import Jinja2Templates
+
+templates = Jinja2Templates(directory="TodoApp/templates")
 
 router = APIRouter(
     prefix='/todos',
@@ -32,6 +35,96 @@ class TodoRequest(BaseModel):
     complete: bool = Field(default=False)
 
 
+def redirect_to_login():
+    redirect_response = RedirectResponse(url="/auth/login-page", status_code=status.HTTP_302_FOUND)
+    redirect_response.delete_cookie(key="access_token")
+    return redirect_response
+
+
+### Pages ###
+
+@router.get("/todo-page")
+async def render_todo_page(request: Request, db: db_dependency, sort_by: str = "id", order: str = "asc"):
+    try:
+        user = await get_current_user(request.cookies.get('access_token'))
+        if user is None:
+            return redirect_to_login()
+
+        query = db.query(Todos).filter(Todos.owner_id == user.get("id"))
+
+        if sort_by == "priority":
+            if order == "asc":
+                query = query.order_by(Todos.priority.asc())
+            else:
+                query = query.order_by(Todos.priority.desc())
+        elif sort_by == "complete":
+            if order == "asc":
+                query = query.order_by(Todos.complete.asc())
+            else:
+                query = query.order_by(Todos.complete.desc())
+        elif sort_by == "id":
+            if order == "asc":
+                query = query.order_by(Todos.id.asc())
+            else:
+                query = query.order_by(Todos.id.desc())
+
+        todos = query.all()
+
+        for idx, todo in enumerate(sorted(todos, key=lambda t: t.id), start=1):
+            todo.display_number = idx
+
+        return templates.TemplateResponse("todo.html",
+                                          {"request": request, "todos": todos, "user": user, "sort_by": sort_by,
+                                           "order": order})
+    except:
+        return redirect_to_login()
+
+
+@router.get('/add-todo-page')
+async def render_todo_page(request: Request):
+    try:
+        user = await get_current_user(request.cookies.get('access_token'))
+
+        if user is None:
+            return redirect_to_login()
+
+        return templates.TemplateResponse("add-todo.html", {"request": request, "user": user})
+    except:
+        return redirect_to_login()
+
+
+@router.get("/edit-todo-page/{todo_id}")
+async def render_edit_todo_page(request: Request, todo_id: int, db: db_dependency):
+    try:
+        user = await get_current_user(request.cookies.get('access_token'))
+
+        if user is None:
+            return redirect_to_login()
+
+        todo = db.query(Todos).filter(Todos.id == todo_id).first()
+
+        return templates.TemplateResponse("edit-todo.html", {"request": request, "todo": todo, "user": user})
+
+    except:
+        return redirect_to_login()
+
+
+@router.get("/view-todo-page/{todo_id}")
+async def render_view_todo_page(request: Request, todo_id: int, db: db_dependency):
+    try:
+        user = await get_current_user(request.cookies.get('access_token'))
+
+        if user is None:
+            return redirect_to_login()
+
+        todo = db.query(Todos).filter(Todos.id == todo_id).first()
+
+        return templates.TemplateResponse("view-todo.html", {"request": request, "todo": todo, "user": user})
+    except:
+        return redirect_to_login()
+
+
+### Endpoints ###
 @router.get("/", status_code=status.HTTP_200_OK)
 async def read_all(user: user_dependency, db: db_dependency):
     if user is None:
@@ -45,7 +138,7 @@ async def read_todo(user: user_dependency, db: db_dependency, todo_id: int = Pat
     if user is None:
         raise HTTPException(status_code=401, detail='Authentication failed')
 
-    todo_model = db.query(Todos).filter(Todos.id == todo_id)\
+    todo_model = db.query(Todos).filter(Todos.id == todo_id) \
         .filter(Todos.owner_id == user.get('id')).first()
     if todo_model is not None:
         return todo_model
@@ -68,7 +161,7 @@ async def update_todo(user: user_dependency, db: db_dependency,
     if user is None:
         raise HTTPException(status_code=401, detail='Authentication failed')
 
-    todo_model = db.query(Todos).filter(Todos.id == todo_id)\
+    todo_model = db.query(Todos).filter(Todos.id == todo_id) \
         .filter(Todos.owner_id == user.get('id')).first()
     if todo_model is None:
         raise HTTPException(status_code=404, detail='Todo not found')
@@ -86,7 +179,7 @@ async def delete_todo(user: user_dependency, db: db_dependency, todo_id: int = P
     if user is None:
         raise HTTPException(status_code=401, detail='Authentication failed')
 
-    todo_model = db.query(Todos).filter(Todos.id == todo_id)\
+    todo_model = db.query(Todos).filter(Todos.id == todo_id) \
         .filter(Todos.owner_id == user.get('id')).first()
     if todo_model is None:
         raise HTTPException(status_code=404, detail='Todo not found')
