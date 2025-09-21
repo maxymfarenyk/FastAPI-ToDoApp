@@ -74,6 +74,7 @@ if (loginForm) {
 
         try {
             const data = await apiRequest('/auth/token', 'POST', payload);
+            logout();
             setCookie('access_token', data.access_token);
             window.location.href = '/todos/todo-page';
         } catch (error) {
