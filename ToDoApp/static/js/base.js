@@ -13,7 +13,7 @@ function setCookie(name, value, minutes = 20) {
     let cookieStr = `${name}=${value};expires=${expires};path=/`;
 
     if (window.location.protocol === "https:") {
-        cookieStr += ";Secure;SameSite=Lax";
+        cookieStr += ";Secure";
     }
 
     console.log('Setting cookie:', cookieStr); // Debug log
@@ -30,7 +30,7 @@ function logout() {
         const name = cookie.split("=")[0].trim();
         if(name){
             if (window.location.protocol === "https:") {
-                    document.cookie = name + "=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/;Secure;SameSite=Lax";
+                    document.cookie = name + "=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/;Secure";
             }
             else{
                 document.cookie = name + "=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/";
