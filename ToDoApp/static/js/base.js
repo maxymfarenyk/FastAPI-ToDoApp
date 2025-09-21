@@ -13,7 +13,14 @@ function setCookie(name, value, minutes = 20) {
         cookieStr += ";Secure;SameSite=Lax";
     }
 
+    console.log('Setting cookie:', cookieStr); // Debug log
     document.cookie = cookieStr;
+
+    // Verify it was set
+    setTimeout(() => {
+        const retrieved = getCookie(name);
+        console.log('Cookie after setting:', retrieved);
+    }, 100);
 }
 
 function logout() {
