@@ -1,0 +1,45 @@
+version: '3.8'
+
+services:
+  # PostgreSQL база даних
+  postgres:
+    image: postgres:17-alpine
+    container_name: todo_postgres
+    env_file:
+      - .env
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - todo_network
+    restart: unless-stopped
+
+  # FastAPI додаток
+  fastapi_app:
+    build: .
+    container_name: todo_fastapi
+    env_file:
+      - .env
+    environment:
+      DATABASE_URL: ${DATABASE_URL}
+      SECRET_KEY: ${SECRET_KEY}
+      ALGORITHM: ${ALGORITHM}
+    ports:
+      - "${FASTAPI_PORT:-8000}:8000"
+    depends_on:
+      - postgres
+    networks:
+      - todo_network
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+
+networks:
+  todo_network:
+    driver: bridge

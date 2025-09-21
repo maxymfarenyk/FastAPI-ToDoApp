@@ -11,14 +11,7 @@ function setCookie(name, value, minutes = 20) {
     const expires = new Date(Date.now() + adjustedMinutes*60*1000).toUTCString();
 
     let cookieStr = `${name}=${value};expires=${expires};path=/`;
-
-    console.log('Setting cookie:', cookieStr); // Debug log
     document.cookie = cookieStr;
-
-    setTimeout(() => {
-        const retrieved = getCookie(name);
-        console.log('Cookie after setting:', retrieved);
-    }, 100);
 }
 
 function logout() {
