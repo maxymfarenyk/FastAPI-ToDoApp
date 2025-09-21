@@ -1,7 +1,6 @@
-import os
 from datetime import timedelta, datetime, timezone
 from typing import Annotated
-from fastapi import APIRouter, Depends, HTTPException, Request
+from fastapi import APIRouter, Depends, HTTPException, Request, Response
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 from starlette import status
@@ -105,12 +104,20 @@ async def create_user(db: db_dependency, create_user_request: CreateUserRequest)
     db.add(create_user_model)
     db.commit()
 
-@router.post("/token", response_model=Token)
-async def login_for_access_token(form_data: Annotated[OAuth2PasswordRequestForm, Depends()], db: db_dependency):
+@router.post("/token")
+async def login_for_access_token(response: Response, form_data: Annotated[OAuth2PasswordRequestForm, Depends()], db: db_dependency):
     user = authenticate_user(form_data.username, form_data.password, db)
     if not user:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,
                             detail='Could not validate user')
     token = create_access_token(user.username, user.id, user.role, timedelta(minutes=20))
 
-    return {'access_token': token, 'token_type': 'bearer'}
+    response.set_cookie(
+        key="access_token",
+        value=token,
+        httponly=True,
+        samesite="Lax",
+        secure=True
+    )
+
+    return {"message": "Login successful"}
