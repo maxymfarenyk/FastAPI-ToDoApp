@@ -12,10 +12,6 @@ function setCookie(name, value, minutes = 20) {
 
     let cookieStr = `${name}=${value};expires=${expires};path=/`;
 
-    if (window.location.protocol === "https:") {
-        cookieStr += ";Secure";
-    }
-
     console.log('Setting cookie:', cookieStr); // Debug log
     document.cookie = cookieStr;
 
@@ -29,11 +25,7 @@ function logout() {
     document.cookie.split(";").forEach(cookie => {
         const name = cookie.split("=")[0].trim();
         if(name){
-            if (window.location.protocol === "https:") {
-                    document.cookie = name + "=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/;Secure";
-            }
-            else{
-                document.cookie = name + "=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/";
+            document.cookie = name + "=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/";
             }
         }
     });
