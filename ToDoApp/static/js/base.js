@@ -7,7 +7,13 @@ function getCookie(name) {
 
 function setCookie(name, value, minutes = 20) {
     const expires = new Date(Date.now() + minutes*60*1000).toUTCString();
-    document.cookie = `${name}=${value};expires=${expires};path=/`;
+    let cookieStr = `${name}=${value};expires=${expires};path=/`;
+
+    if (window.location.protocol === "https:") {
+        cookieStr += ";Secure;SameSite=Lax";
+    }
+
+    document.cookie = cookieStr;
 }
 
 function logout() {
@@ -74,7 +80,6 @@ if (loginForm) {
 
         try {
             const data = await apiRequest('/auth/token', 'POST', payload);
-            logout();
             setCookie('access_token', data.access_token);
             window.location.href = '/todos/todo-page';
         } catch (error) {
