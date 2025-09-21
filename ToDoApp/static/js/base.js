@@ -73,7 +73,8 @@ if (loginForm) {
         const payload = new URLSearchParams(formData.entries());
 
         try {
-            await apiRequest('/auth/token', 'POST', payload);
+            const data = await apiRequest('/auth/token', 'POST', payload);
+            setCookie('access_token', data.access_token);
             window.location.href = '/todos/todo-page';
         } catch (error) {
             console.error(error);
