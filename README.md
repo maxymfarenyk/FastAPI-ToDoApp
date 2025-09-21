@@ -178,11 +178,3 @@ docker run -d -p 8000:8000 maxymfarenyk/fastapi-todoapp:latest
 ## 📝 License
 
 Personal project for educational and portfolio purpose.
-
-## 👨‍💻 Author
-
-**Maksym Farenyk** - [GitHub](https://github.com/maxymfarenyk)
-
----
-
-⭐ If you found this project helpful, please give it a star!
