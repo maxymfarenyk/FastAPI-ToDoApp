@@ -6,7 +6,10 @@ function getCookie(name) {
 }
 
 function setCookie(name, value, minutes = 20) {
-    const expires = new Date(Date.now() + minutes*60*1000).toUTCString();
+    const offset = new Date().getTimezoneOffset();
+    const adjustedMinutes = minutes + Math.abs(offset);
+    const expires = new Date(Date.now() + adjustedMinutes*60*1000).toUTCString();
+
     let cookieStr = `${name}=${value};expires=${expires};path=/`;
 
     if (window.location.protocol === "https:") {
@@ -16,7 +19,6 @@ function setCookie(name, value, minutes = 20) {
     console.log('Setting cookie:', cookieStr); // Debug log
     document.cookie = cookieStr;
 
-    // Verify it was set
     setTimeout(() => {
         const retrieved = getCookie(name);
         console.log('Cookie after setting:', retrieved);
@@ -26,7 +28,14 @@ function setCookie(name, value, minutes = 20) {
 function logout() {
     document.cookie.split(";").forEach(cookie => {
         const name = cookie.split("=")[0].trim();
-        document.cookie = name + "=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/";
+        if(name){
+            if (window.location.protocol === "https:") {
+                    document.cookie = name + "=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/;Secure;SameSite=Lax";
+            }
+            else{
+                document.cookie = name + "=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/";
+            }
+        }
     });
     window.location.href = '/auth/login-page';
 }
