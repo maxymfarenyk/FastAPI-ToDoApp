@@ -116,7 +116,7 @@ async def login_for_access_token(response: Response, form_data: Annotated[OAuth2
         key="access_token",
         value=token,
         httponly=True,
-        samesite="None",
+        samesite="Lax",
         secure=True
     )
 
