@@ -15,10 +15,9 @@ A modern full-stack web application for task management, built with FastAPI back
 - **FastAPI** - Modern Python web framework
 - **Pydantic** - Data validation and settings management
 - **Uvicorn** - ASGI server
-- **SQLAlchemy** (if database is used)
-
+- **SQLAlchemy** - Object relational mapping
 ### Frontend
-- **HTML/CSS/JavaScript** - Interactive user interface
+- **HTML/CSS/JavaScript** - User interface
 - **Bootstrap**
 
 ## 📋 Prerequisites
